@@ -1,2 +1,7 @@
-# Gorps
-Gurps character management with go web server
+# gorps
+GURPS character management with go.
+
+## Configuration
+
+
+## API
