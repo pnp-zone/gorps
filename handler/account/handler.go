@@ -37,3 +37,17 @@ func (a *Handler) Login() echo.HandlerFunc {
 		return c.NoContent(200)
 	})
 }
+
+func (a *Handler) Logout() echo.HandlerFunc {
+	return middleware.Wrap(func(c *handler.Context) error {
+		if !c.IsAuthenticated() {
+			return c.NoContent(200)
+		}
+
+		if err := middleware.Logout(a.DB, c); err != nil {
+			return c.JSON(400, &Error{Error: err.Error()})
+		}
+
+		return c.NoContent(200)
+	})
+}
