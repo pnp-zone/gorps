@@ -9,6 +9,7 @@ import (
 	"github.com/pnp-zone/gorps/handler"
 	"github.com/pnp-zone/gorps/models"
 	"gorm.io/driver/sqlite"
+	"html/template"
 )
 
 func StartServer(configPath string) {
@@ -37,6 +38,12 @@ func StartServer(configPath string) {
 	e.Use(middleware.Logging(log))
 	e.Use(middleware.Panic(log))
 	e.Use(middleware.Session(db, log, &middleware.SessionConfig{}))
+
+	// Template rendering
+	renderer := &TemplateRenderer{
+		templates: template.Must(template.ParseGlob("templates/*.gohtml")),
+	}
+	e.Renderer = renderer
 
 	AddRoutes(e, db, config)
 

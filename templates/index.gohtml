@@ -1,0 +1,14 @@
+{{define "index"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    document.isLoggedIn = {{.IsAuthenticated}};
+</script>
+</body>
+</html>
+{{end}}

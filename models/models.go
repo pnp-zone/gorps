@@ -60,8 +60,8 @@ type Advantage struct {
 	PointsPerLevel int         `json:"points_per_level"`
 	BookReference  string      `json:"book_reference"`
 	Notes          string      `json:"notes"`
-	CR             int         `json:"cr"`
-	CRAdj          string      `json:"cr_adj"`
+	ControlRole    int         `json:"control_role"`
+	ControlRoleAdj string      `json:"control_role_adj"`
 	Modifier       []*Modifier `json:"modifier" gorm:"many2many:advantage_modifier;"`
 	Features       []*Feature  `json:"features" gorm:"many2many:advantage_features;"`
 }
@@ -79,8 +79,8 @@ type Disadvantage struct {
 	PointsPerLevel int         `json:"points_per_level"`
 	BookReference  string      `json:"book_reference"`
 	Notes          string      `json:"notes"`
-	CR             int         `json:"cr"`
-	CRAdj          string      `json:"cr_adj"`
+	ControlRole    int         `json:"control_role"`
+	ControlRoleAdj string      `json:"control_role_adj"`
 	Modifier       []*Modifier `json:"modifier" gorm:"many2many:disadvantage_modifier;"`
 	Features       []*Feature  `json:"features" gorm:"many2many:disadvantage_features;"`
 }
@@ -98,8 +98,8 @@ type Quirk struct {
 	PointsPerLevel int         `json:"points_per_level"`
 	BookReference  string      `json:"book_reference"`
 	Notes          string      `json:"notes"`
-	CR             int         `json:"cr"`
-	CRAdj          string      `json:"cr_adj"`
+	ControlRole    int         `json:"control_role"`
+	ControlRoleAdj string      `json:"control_role_adj"`
 	Modifier       []*Modifier `json:"modifier" gorm:"many2many:quirk_modifier;"`
 	Features       []*Feature  `json:"features" gorm:"many2many:quirk_features;"`
 }
@@ -117,8 +117,8 @@ type Perk struct {
 	PointsPerLevel int         `json:"points_per_level"`
 	BookReference  string      `json:"book_reference"`
 	Notes          string      `json:"notes"`
-	CR             int         `json:"cr"`
-	CRAdj          string      `json:"cr_adj"`
+	ControlRole    int         `json:"control_role"`
+	ControlRoleAdj string      `json:"control_role_adj"`
 	Modifier       []*Modifier `json:"modifier" gorm:"many2many:perk_modifier;"`
 	Features       []*Feature  `json:"features" gorm:"many2many:perk_features;"`
 }
