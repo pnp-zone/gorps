@@ -16,6 +16,7 @@ func AddRoutes(e *echo.Echo, db *gorm.DB, config *Config) {
 
 	e.POST("/api/v1/login", accHandler.Login())
 	e.POST("/api/v1/logout", accHandler.Logout())
+	e.POST("/api/v1/register", accHandler.Register())
 
 	e.GET("/", index.Index())
 

@@ -19,4 +19,30 @@ bin/./gorps-server
 ```
 
 ## API
+
+### `/api/v1/register`
+- Method: `POST`
+
+Example body:
+```json
+{
+  "username": "",
+  "password": ""
+}
+```
+
 ### `/api/v1/login`
+- Method: `POST`
+
+Example body:
+```json
+{
+  "username": "",
+  "password": ""
+}
+```
+
+### `/api/v1/logout`
+- Method `POST`
+
+Body is not required.
