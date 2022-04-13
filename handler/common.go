@@ -2,10 +2,12 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/myOmikron/echotools/middleware"
 	"gorm.io/gorm"
 )
 
 type Context struct {
-	Context echo.Context
-	DB      *gorm.DB
+	echo.Context
+	middleware.SessionContext
+	DB *gorm.DB
 }

@@ -6,6 +6,7 @@ require (
 	github.com/hellflame/argparse v1.7.6
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/myOmikron/echotools v0.0.0-20220407224427-bdf562b0ed02
+	github.com/pelletier/go-toml v1.9.4
 	gorm.io/driver/sqlite v1.3.1
 	gorm.io/gorm v1.23.3
 )
