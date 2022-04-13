@@ -3,9 +3,11 @@ package account
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/myOmikron/echotools/auth"
+	"github.com/myOmikron/echotools/database"
 	"github.com/myOmikron/echotools/logging"
 	"github.com/myOmikron/echotools/middleware"
 	"github.com/myOmikron/echotools/utility"
+	"github.com/myOmikron/echotools/utilitymodels"
 	"github.com/pnp-zone/gorps/handler"
 	"gorm.io/gorm"
 )
@@ -14,6 +16,28 @@ var log = logging.GetLogger("account-handler")
 
 type Handler struct {
 	DB *gorm.DB
+}
+
+func (a *Handler) Register() echo.HandlerFunc {
+	return middleware.Wrap(func(c *handler.Context) error {
+		var f RegisterRequest
+		if err := utility.ValidateJsonForm(c, &f); err != nil {
+			log.Infof("Login failed: %s", err.Error())
+			return c.JSON(400, &Error{Error: err.Error()})
+		}
+
+		var userCount int64
+		a.DB.Find(&utilitymodels.User{}, "username = ?", *f.Username).Count(&userCount)
+		if userCount > 0 {
+			return c.NoContent(409)
+		}
+
+		if _, err := database.CreateUser(a.DB, *f.Username, *f.Password, nil, true); err != nil {
+			return err
+		}
+
+		return c.NoContent(200)
+	})
 }
 
 func (a *Handler) Login() echo.HandlerFunc {
