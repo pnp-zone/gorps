@@ -12,6 +12,7 @@ import (
 
 type Server struct {
 	ListenAddress string
+	StaticDirPath string
 }
 
 type Config struct {
