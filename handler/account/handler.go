@@ -23,7 +23,7 @@ func (a *Handler) Register() echo.HandlerFunc {
 		var f RegisterRequest
 		if err := utility.ValidateJsonForm(c, &f); err != nil {
 			log.Infof("Login failed: %s", err.Error())
-			return c.JSON(400, &Error{Error: err.Error()})
+			return c.JSON(400, &handler.Error{Error: err.Error()})
 		}
 
 		var userCount int64
@@ -45,7 +45,7 @@ func (a *Handler) Login() echo.HandlerFunc {
 		var f LoginRequest
 		if err := utility.ValidateJsonForm(c, &f); err != nil {
 			log.Infof("Login failed: %s", err.Error())
-			return c.JSON(400, &Error{Error: err.Error()})
+			return c.JSON(400, &handler.Error{Error: err.Error()})
 		}
 
 		if user, err := auth.Authenticate(a.DB, *f.Username, *f.Password); err != nil {
@@ -54,7 +54,7 @@ func (a *Handler) Login() echo.HandlerFunc {
 		} else {
 			if err := middleware.Login(a.DB, user, c); err != nil {
 				log.Warnf("Error while logging in: %s", err.Error())
-				return c.JSON(500, &Error{Error: err.Error()})
+				return c.JSON(500, &handler.Error{Error: err.Error()})
 			}
 		}
 
@@ -69,7 +69,7 @@ func (a *Handler) Logout() echo.HandlerFunc {
 		}
 
 		if err := middleware.Logout(a.DB, c); err != nil {
-			return c.JSON(400, &Error{Error: err.Error()})
+			return c.JSON(400, &handler.Error{Error: err.Error()})
 		}
 
 		return c.NoContent(200)

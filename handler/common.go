@@ -11,3 +11,7 @@ type Context struct {
 	middleware.SessionContext
 	DB *gorm.DB
 }
+
+type Error struct {
+	Error string `json:"error"`
+}
