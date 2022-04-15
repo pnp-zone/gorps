@@ -1,0 +1,98 @@
+:root {
+    --background: #2a2e32;
+}
+
+@font-face {
+    font-family: gurpsIcons;
+    src: url('/static/ttf/gurps_icons.ttf');
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    color: white;
+    background-color: var(--background);
+    font-family: sans-serif;
+}
+
+.flex-vertical {
+    display: flex;
+    flex-direction: column;
+}
+.flex-horizontal {
+    display: flex;
+    flex-direction: row;
+}
+.stick-top {
+    position: sticky;
+    top: 0;
+}
+
+table thead {
+    background-color: #1b1e20;
+}
+
+/**
+ * .row-border-hover creates a border around a hovered row
+ */
+table.row-border-hover {
+    --highlight-border: lightblue;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+table.row-border-hover td:first-child {
+    border-left: 1px solid transparent;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+table.row-border-hover td {
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+}
+table.row-border-hover td:last-child {
+    border-right: 1px solid transparent;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+table.row-border-hover tr:hover td {
+    border-color: var(--highlight-border);
+}
+
+
+table.skills td:nth-child(1) { /* Skill Name */
+    width: 40em;
+}
+table.skills td:nth-child(2) { /* Skill Attribute */
+    width: 5em;
+}
+table.skills td:nth-child(3) { /* Skill Difficulty */
+    width: 5em;
+}
+table.skills td:nth-child(4) { /* Categories */
+    width: 20em;
+}
+table.skills td:nth-child(4) span {
+    white-space: nowrap;
+}
+table.skills td:nth-child(4) span:not(:last-child)::after {
+    content: ", ";
+    white-space: normal;
+}
+table.skills td:nth-child(5) { /* Skill Reference */
+    width: 6em;
+}
+
+
+table.advantages td:nth-child(1) { /* Advantage Name */
+    width: 40em;
+}
+table.advantages td:nth-child(2), th:nth-child(2) { /* Advantage Tags */
+    width: 5em;
+    font-family: gurpsIcons;
+}
+table.advantages td:nth-child(3) { /* Advantage Name */
+    width: 5em;
+}
+table.advantages td:nth-child(4) { /* Skill Reference */
+    width: 6em;
+}
