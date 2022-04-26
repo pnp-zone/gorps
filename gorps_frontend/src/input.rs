@@ -1,7 +1,22 @@
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlInputElement, Event};
-use yew::{prelude::*, html};
+use yew::prelude::*;
 
+/**
+ * Wraps a callback taking a String to take a dom event instead.
+ *
+ * The event's target is cast into an \<input\> whose value is passed to the wrapped callback.
+ *
+ * Example:
+ * ```rust
+ * use yew::html;
+ * use gorps_frontend::input::callback_by_value;
+ *
+ * html! {
+ *     <input oninput={callback_by_value(Callback::from(|string| todo!()))}>
+ * }
+ * ```
+ */
 pub fn callback_by_value<E: JsCast>(cb: &Callback<String>) -> Callback<E> {
     use gloo::console::error;
     let cb = cb.clone();
@@ -20,17 +35,4 @@ pub fn callback_by_value<E: JsCast>(cb: &Callback<String>) -> Callback<E> {
             error!("Generic parameter is not a subtype of Event.")
         }
     })
-}
-
-#[derive(Properties, PartialEq)]
-pub struct InputProps {
-    pub on_change: Option<Callback<String>>,
-}
-
-#[function_component(Input)]
-pub fn input_function(props: &InputProps) -> Html {
-    let oninput = props.on_change.as_ref().map(callback_by_value);
-    return html! {
-        <input {oninput}/>
-    };
 }

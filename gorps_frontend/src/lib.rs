@@ -4,11 +4,11 @@ use web_sys::{HtmlInputElement, FocusEvent};
 use gloo::net::http::Request;
 use gloo::console;
 
-mod select;
-mod input;
-mod skill;
+pub mod select;
+pub mod input;
+pub mod skill;
+pub mod skill_table;
 use skill::{Skill, GCSSkill};
-mod skill_table;
 use skill_table::SkillTable;
 
 pub struct Main {

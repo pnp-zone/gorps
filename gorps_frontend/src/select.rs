@@ -1,12 +1,40 @@
-use std::marker::PhantomData;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlSelectElement;
 use yew::{prelude::*, html, virtual_dom::Key};
 
-pub fn callback_by_option<T: Clone + 'static, E: JsCast>(callback: &Callback<T>, options: &Vec<T>) -> Callback<E> {
+/**
+ * Wraps a callback taking the options' type to take a dom event instead.
+ *
+ * The event's target is cast into an \<select\> whose value is parsed into an index.
+ * This index is then used on the options parameter to retrieve the option
+ * which is passed to the wrapped callback.
+ *
+ * Example:
+ * ```rust
+ * use yew::html;
+ * use gorps_frontend::select::callback_by_option;
+ *
+ * pub enum Fruits {
+ *     Apple,
+ *     Banana,
+ * }
+ *
+ * let fruits = vec![Fruits::Apple, Fruits::Banana];
+ *
+ * html! {
+ *     <select oninput={callback_by_option(Callback::from(|fruit| todo!()))}>
+ *         <option value="0">{"Apple"}</option>
+ *         <option value="1">{"Banana"}</option>
+ *     </select>
+ * }
+ * ```
+ *
+ * Since the \<option\> s have to match the options parameter, you should generate them using `options_from_slice`.
+ */
+pub fn callback_by_option<T: Clone + 'static, E: JsCast>(callback: &Callback<T>, options: &[T]) -> Callback<E> {
     use gloo::console::error;
     let callback = callback.clone();
-    let options = options.clone();
+    let options: Vec<T> = options.into();
     Callback::from(move |event: E| {
         if let Ok(event) = event.dyn_into::<Event>() {
             if let Some(target) = event.target() {
@@ -32,53 +60,33 @@ pub fn callback_by_option<T: Clone + 'static, E: JsCast>(callback: &Callback<T>,
     })
 }
 
-pub fn options_from_vec<'a, T>(vec: &'a Vec<T>) -> impl Iterator<Item=Html> + 'a
+/**
+ * Creates a map over a slice turning the items into \<option\> s.
+ *
+ * A \<option\>'s value is its index in the slice, so it can be handled by `callback_by_option`.
+ *
+ * Example:
+ * ```rust
+ * use yew::html;
+ * use gorps_frontend::select::options_from_slice;
+ *
+ * let fruits = ["Apple", "Banana"];
+ *
+ * html! {
+ *     <select>
+ *         { for options_from_slice(fruits) }
+ *     </select>
+ * }
+ * ```
+ */
+pub fn options_from_slice<'a, T>(options: &'a [T]) -> impl Iterator<Item=Html> + 'a
     where
         T: Clone + 'static + ToString,
         Key: From<T>,
 {
-    vec.iter()
+    options.iter()
         .enumerate()
         .map(|(index, value)| html! {
             <option key={ value.clone() } value={ index.to_string() } selected={ index == 0 }>{ value.clone() }</option>
         })
-}
-
-#[derive(Properties)]
-pub struct SelectProps<T> {
-    pub options: Vec<T>,
-    pub on_change: Option<Callback<T>>,
-}
-impl <T> PartialEq for SelectProps<T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.options.len() == other.options.len() && self.on_change == other.on_change
-    }
-}
-
-#[derive(Default)]
-pub struct Select<T> {
-    options: PhantomData<T>,
-}
-
-impl <T> Component for Select<T>
-where
-    T: Clone + 'static + ToString,
-    Key: From<T>,
-{
-    type Message = ();
-    type Properties = SelectProps<T>;
-
-    fn create(_: &Context<Self>) -> Self {
-        Self { options: PhantomData, }
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        let oninput = ctx.props().on_change.as_ref().map(|cb| callback_by_option(cb, &ctx.props().options));
-        let options = options_from_vec(&ctx.props().options);
-        return html! {
-            <select {oninput}>
-                { for options }
-            </select>
-        };
-    }
 }

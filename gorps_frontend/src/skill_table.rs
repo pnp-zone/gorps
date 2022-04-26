@@ -1,6 +1,6 @@
 use yew::{prelude::*, html, virtual_dom::Key};
 use crate::skill::{ToStr, Skill, Optional, Attribute, Difficulty, get_categories};
-use crate::select::{callback_by_option, options_from_vec};
+use crate::select::{callback_by_option, options_from_slice};
 use crate::input::callback_by_value;
 
 macro_rules! derive_from_to_str {
@@ -145,13 +145,13 @@ impl Component for SkillTable {
                     <tr>
                         <th><input oninput={ callback_by_value(&ctx.link().callback(SkillTableMsg::FilterName)) }/></th>
                         <th><select oninput={ callback_by_option(&ctx.link().callback(SkillTableMsg::FilterAttr), &attributes) }>
-                            {for options_from_vec(&attributes)}
+                            {for options_from_slice(&attributes)}
                         </select></th>
                         <th><select oninput={ callback_by_option(&ctx.link().callback(SkillTableMsg::FilterDiff), &difficulties) }>
-                            {for options_from_vec(&difficulties)}
+                            {for options_from_slice(&difficulties)}
                         </select></th>
                         <th><select oninput={ callback_by_option(&ctx.link().callback(SkillTableMsg::FilterCate), &categories) }>
-                            {for options_from_vec(&categories)}
+                            {for options_from_slice(&categories)}
                         </select></th>
                         <th></th>
                     </tr>
