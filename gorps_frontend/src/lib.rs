@@ -7,13 +7,18 @@ use gloo::console;
 pub mod util;
 pub mod skill;
 pub mod skill_table;
+pub mod auth;
+
 use skill::{Skill, GCSSkill};
 use skill_table::SkillTable;
+use auth::Login;
 
 pub struct Main {
+    pub username: Option<String>,
     pub skills: Vec<Skill>,
 }
 pub enum MainMsg {
+    Login(String),
     RequestSkills(String),
     ReceiveSkills(Vec<GCSSkill>),
 }
@@ -23,6 +28,7 @@ impl Component for Main {
 
     fn create(_ctx: &Context<Self>) -> Self {
         Main {
+            username: None,
             skills: Vec::new(),
         }
     }
@@ -53,29 +59,36 @@ impl Component for Main {
                 self.skills.extend_from_slice(&skills);
                 true
             }
+            Login(username) => {self.username = Some(username); true}
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        return html! {
-            <>
-                <form onsubmit={ctx.link().callback(|event: FocusEvent| {
-                    let input: HtmlInputElement = js_sys::Reflect::get(
-                        &event.target().expect("Event has to fire on something"),
-                        &"0".into(),
-                    ).expect_throw("The form has a field")
-                    .dyn_into()
-                    .expect_throw("The form's 1st field is an input");
-                    event.prevent_default();
-                    let url = input.value();
-                    input.set_value("");
-                    MainMsg::RequestSkills(url)
-                })}>
-                    <input name="url" value="/static/sample.skl"/>
-                </form>
-                <SkillTable skills={self.skills.clone()}/>
-            </>
-        };
+        if let Some(username) = self.username.as_ref() {
+            return html! {
+                <>
+                    <form onsubmit={ctx.link().callback(|event: FocusEvent| {
+                        let input: HtmlInputElement = js_sys::Reflect::get(
+                            &event.target().expect("Event has to fire on something"),
+                            &"0".into(),
+                        ).expect_throw("The form has a field")
+                        .dyn_into()
+                        .expect_throw("The form's 1st field is an input");
+                        event.prevent_default();
+                        let url = input.value();
+                        input.set_value("");
+                        MainMsg::RequestSkills(url)
+                    })}>
+                        <input name="url" value="/static/sample.skl"/>
+                    </form>
+                    <SkillTable skills={self.skills.clone()}/>
+                </>
+            };
+        } else {
+            return html! {
+                <Login callback={ctx.link().callback(MainMsg::Login)}/>
+            };
+        }
     }
 }
 
