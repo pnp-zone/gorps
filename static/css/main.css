@@ -27,6 +27,9 @@ body {
     position: sticky;
     top: 0;
 }
+.hidden {
+    display: none;
+}
 
 table thead {
     background-color: #1b1e20;
