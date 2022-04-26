@@ -1,5 +1,5 @@
-# gorps
-GURPS character management with go.
+# goRpS
+GURPS character management as go web server with rust frontend.
 
 ## Building
 ```bash
