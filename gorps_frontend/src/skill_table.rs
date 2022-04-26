@@ -1,7 +1,7 @@
 use yew::{prelude::*, html, virtual_dom::Key};
 use crate::skill::{ToStr, Skill, Optional, Attribute, Difficulty, get_categories};
-use crate::select::{callback_by_option, options_from_slice};
-use crate::input::callback_by_value;
+use crate::util::select::{callback_by_option, options_from_slice};
+use crate::util::input::callback_by_value;
 
 macro_rules! derive_from_to_str {
     ($T:path) => {

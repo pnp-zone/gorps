@@ -1,7 +1,8 @@
 use wasm_bindgen::JsCast;
 use web_sys::HtmlSelectElement;
 use yew::{prelude::*, html, virtual_dom::Key};
-use gloo::console::error;
+
+use crate::util::CallbackExtension;
 
 /**
  * Wraps a callback taking the options' type to take a dom event instead.
@@ -35,25 +36,20 @@ use gloo::console::error;
 pub fn callback_by_option<T: Clone + 'static, E: JsCast>(callback: &Callback<T>, options: &[T]) -> Callback<E> {
     let callback = callback.clone();
     let options: Vec<T> = options.into();
-    Callback::from(move |event: E| { (||  {
-        let event: Option<Event> = event.dyn_into().ok();
-        if event.is_none() {error!("Generic parameter is not a subtype of Event.");}
-
-        let target: Option<_> = event?.target();
-        if target.is_none() {error!("Event was throw without a target.");}
-
-        let select: Option<HtmlSelectElement> = target?.dyn_into().ok();
-        if select.is_none() {error!("Event wasn't throw on an select.");}
-
-        let index: Option<usize> = select?.value().parse().ok();
-        if index.is_none() {error!("Select's value wasn't an index. Seems like the options weren't generated properly");}
-
-        let value: Option<&T> = options.get(index?);
-        if value.is_none() {error!("Select's index is out of range. Seems like the options weren't generated properly.")}
-
-        callback.emit(value?.clone());
-        Some(())
-    })(); })
+    Callback::log_err(move |event: E| {
+        let event: Event = event.dyn_into()
+            .map_err(|_| "Generic parameter is not a subtype of Event.")?;
+        let target = event.target()
+            .ok_or_else(|| "Event was throw without a target.")?;
+        let select: HtmlSelectElement = target.dyn_into()
+            .map_err(|_| "Event wasn't throw on an select.")?;
+        let index: usize = select.value().parse()
+            .map_err(|_| "Select's value wasn't an index. Seems like the options weren't generated properly")?;
+        let value: &T = options.get(index)
+            .ok_or_else(|| "Select's index is out of range. Seems like the options weren't generated properly.")?;
+        callback.emit(value.clone());
+        Ok(())
+    })
 }
 
 /**
