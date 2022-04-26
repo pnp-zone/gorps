@@ -1,6 +1,7 @@
 use wasm_bindgen::JsCast;
 use web_sys::HtmlSelectElement;
 use yew::{prelude::*, html, virtual_dom::Key};
+use gloo::console::error;
 
 /**
  * Wraps a callback taking the options' type to take a dom event instead.
@@ -32,32 +33,27 @@ use yew::{prelude::*, html, virtual_dom::Key};
  * Since the \<option\> s have to match the options parameter, you should generate them using `options_from_slice`.
  */
 pub fn callback_by_option<T: Clone + 'static, E: JsCast>(callback: &Callback<T>, options: &[T]) -> Callback<E> {
-    use gloo::console::error;
     let callback = callback.clone();
     let options: Vec<T> = options.into();
-    Callback::from(move |event: E| {
-        if let Ok(event) = event.dyn_into::<Event>() {
-            if let Some(target) = event.target() {
-                if let Ok(input) = target.dyn_into::<HtmlSelectElement>() {
-                    if let Ok(index) = input.value().parse::<usize>() {
-                        if let Some(value) = options.get(index) {
-                            callback.emit(value.clone());
-                        } else {
-                            error!("Select's index is out of range. Seems like the options weren't generated properly.")
-                        }
-                    } else {
-                        error!("Select's value wasn't an index. Seems like the options weren't generated properly");
-                    }
-                } else {
-                    error!("Event wasn't throw on an input.");
-                }
-            } else {
-                error!("Event was throw without a target.");
-            }
-        } else {
-            error!("Generic parameter is not a subtype of Event.")
-        }
-    })
+    Callback::from(move |event: E| { (||  {
+        let event: Option<Event> = event.dyn_into().ok();
+        if event.is_none() {error!("Generic parameter is not a subtype of Event.");}
+
+        let target: Option<_> = event?.target();
+        if target.is_none() {error!("Event was throw without a target.");}
+
+        let select: Option<HtmlSelectElement> = target?.dyn_into().ok();
+        if select.is_none() {error!("Event wasn't throw on an select.");}
+
+        let index: Option<usize> = select?.value().parse().ok();
+        if index.is_none() {error!("Select's value wasn't an index. Seems like the options weren't generated properly");}
+
+        let value: Option<&T> = options.get(index?);
+        if value.is_none() {error!("Select's index is out of range. Seems like the options weren't generated properly.")}
+
+        callback.emit(value?.clone());
+        Some(())
+    })(); })
 }
 
 /**
