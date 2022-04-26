@@ -1,35 +1,36 @@
-use wasm_bindgen::{JsCast, UnwrapThrowExt};
-use web_sys::{HtmlInputElement, InputEvent};
+use wasm_bindgen::JsCast;
+use web_sys::{HtmlInputElement, Event};
 use yew::{prelude::*, html};
 
-pub struct Input;
+pub fn callback_by_value<E: JsCast>(cb: &Callback<String>) -> Callback<E> {
+    use gloo::console::error;
+    let cb = cb.clone();
+    Callback::from(move |event: E| {
+        if let Ok(event) = event.dyn_into::<Event>() {
+            if let Some(target) = event.target() {
+                if let Ok(input) = target.dyn_into::<HtmlInputElement>() {
+                    cb.emit(input.value());
+                } else {
+                    error!("Event wasn't throw on an input.");
+                }
+            } else {
+                error!("Event was throw without a target.");
+            }
+        } else {
+            error!("Generic parameter is not a subtype of Event.")
+        }
+    })
+}
+
 #[derive(Properties, PartialEq)]
 pub struct InputProps {
     pub on_change: Option<Callback<String>>,
 }
 
-impl Component for Input {
-    type Message = ();
-    type Properties = InputProps;
-
-    fn create(_ctx: &Context<Self>) -> Self {
-        Input
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        let oninput = if let Some(callback) = ctx.props().on_change.as_ref() {
-            let callback = callback.clone();
-            Some(Callback::from(move |event: InputEvent| {
-                let select: HtmlInputElement = event
-                    .target().expect_throw("Event was fired without target")
-                    .dyn_into().expect_throw("Event was fired on something else than <input>");
-                let value: String = select.value();
-                callback.emit(value);
-            }))
-        } else {None};
-
-        return html! {
-            <input {oninput}/>
-        };
-    }
+#[function_component(Input)]
+pub fn input_function(props: &InputProps) -> Html {
+    let oninput = props.on_change.as_ref().map(callback_by_value);
+    return html! {
+        <input {oninput}/>
+    };
 }

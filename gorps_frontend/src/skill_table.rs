@@ -1,7 +1,7 @@
 use yew::{prelude::*, html, virtual_dom::Key};
 use crate::skill::{ToStr, Skill, Optional, Attribute, Difficulty, get_categories};
-use crate::select::Select;
-use crate::input::Input;
+use crate::select::{callback_by_option, options_from_vec};
+use crate::input::callback_by_value;
 
 macro_rules! derive_from_to_str {
     ($T:path) => {
@@ -115,6 +115,23 @@ impl Component for SkillTable {
         let mut categories = get_categories();
         categories.insert(0, "--");
 
+        let attributes: Vec<Optional<Attribute>> = vec![
+            None.into(),
+            Some(Attribute::Strength).into(),
+            Some(Attribute::Dexterity).into(),
+            Some(Attribute::Intelligence).into(),
+            Some(Attribute::Health).into(),
+            Some(Attribute::Perception).into(),
+            Some(Attribute::Willpower).into(),
+        ];
+        let difficulties: Vec<Optional<Difficulty>> = vec![
+            None.into(),
+            Some(Difficulty::Easy).into(),
+            Some(Difficulty::Average).into(),
+            Some(Difficulty::Hard).into(),
+            Some(Difficulty::VeryHard).into(),
+        ];
+
         return html! {
             <table class="skills row-border-hover">
                 <thead class="stick-top">
@@ -126,30 +143,16 @@ impl Component for SkillTable {
                         <th>{"Reference"}</th>
                     </tr>
                     <tr>
-                        <th><Input on_change={ ctx.link().callback(SkillTableMsg::FilterName) }/></th>
-                        <th><Select<Optional<Attribute>>
-                            options={vec![
-                                None.into(),
-                                Some(Attribute::Strength).into(),
-                                Some(Attribute::Dexterity).into(),
-                                Some(Attribute::Intelligence).into(),
-                                Some(Attribute::Health).into(),
-                                Some(Attribute::Perception).into(),
-                                Some(Attribute::Willpower).into(),
-                            ]}
-                            on_change={ ctx.link().callback(SkillTableMsg::FilterAttr) }
-                        /></th>
-                        <th><Select<Optional<Difficulty>>
-                            options={vec![
-                                None.into(),
-                                Some(Difficulty::Easy).into(),
-                                Some(Difficulty::Average).into(),
-                                Some(Difficulty::Hard).into(),
-                                Some(Difficulty::VeryHard).into(),
-                            ]}
-                            on_change={ ctx.link().callback(SkillTableMsg::FilterDiff) }
-                        /></th>
-                        <th><Select<&'static str> options={categories} on_change={ ctx.link().callback(SkillTableMsg::FilterCate) }/></th>
+                        <th><input oninput={ callback_by_value(&ctx.link().callback(SkillTableMsg::FilterName)) }/></th>
+                        <th><select oninput={ callback_by_option(&ctx.link().callback(SkillTableMsg::FilterAttr), &attributes) }>
+                            {for options_from_vec(&attributes)}
+                        </select></th>
+                        <th><select oninput={ callback_by_option(&ctx.link().callback(SkillTableMsg::FilterDiff), &difficulties) }>
+                            {for options_from_vec(&difficulties)}
+                        </select></th>
+                        <th><select oninput={ callback_by_option(&ctx.link().callback(SkillTableMsg::FilterCate), &categories) }>
+                            {for options_from_vec(&categories)}
+                        </select></th>
                         <th></th>
                     </tr>
                 </thead>
