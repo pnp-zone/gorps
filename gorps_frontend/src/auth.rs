@@ -3,6 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{Element, FocusEvent, HtmlFormElement, HtmlInputElement};
 use yew::{prelude::*, html};
 use serde::Serialize;
+use crate::util::{Closure, Future};
 
 pub struct Login;
 #[derive(Properties, PartialEq)]
@@ -31,22 +32,23 @@ impl Component for Login {
         use LoginMsg::*;
         match msg {
             Try(user) => {
-                ctx.link().send_future(async move {
+                ctx.link().send_future_batch(Future::log_err(async move {
                     let req = Request::new("/api/v1/login")
                         .method(POST)
                         .json(&user)
-                        .unwrap(); // TODO error handling
+                        .map_err(|_| "Couldn't create request")?;
 
                     let res = req.send()
                         .await
-                        .unwrap(); // TODO error handling
+                        .map_err(|_| "Couldn't send request")?;
 
-                    if res.ok() {
+                    let msg = if !res.ok() {
                         Success(user)
                     } else {
                         Error(user)
-                    }
-                });
+                    };
+                    Ok(vec![msg])
+                }));
             },
             Success(user) => {
                 if let Some(callback) = ctx.props().callback.as_ref() {
@@ -62,26 +64,21 @@ impl Component for Login {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let onsubmit = ctx.link().batch_callback(|event: FocusEvent| {
-            use gloo::console::error;
-
+        let onsubmit = ctx.link().batch_callback(Closure::log_err(|event: FocusEvent| {
             event.prevent_default();
+            let target = event.target()
+                .ok_or_else(|| "Event was thrown without a target.")?;
+            let form: HtmlFormElement = target.dyn_into()
+                .map_err(|_| "Event wasn't thrown on a form.")?;
+            let inputs = form.elements();
 
-            let target: Option<_> = event.target();
-            if target.is_none() {error!("Event was thrown without a target.");}
-
-            let form: Option<HtmlFormElement> = target?.dyn_into().ok();
-            if form.is_none() {error!("Event wasn't thrown on a form.");}
-
-            let inputs = form?.elements();
-            let to_input: fn (Element) -> Option<HtmlInputElement> = |elem| {elem.dyn_into().ok()};
-            let username: Option<_> = inputs.named_item("username").map(to_input).flatten();
-            let password: Option<_> = inputs.named_item("password").map(to_input).flatten();
-            if username.is_none() {error!("Form doesn't have a \"username\" input");}
-            if password.is_none() {error!("Form doesn't have a \"password\" input");}
-
-            Some(LoginMsg::Try(User {username: username?.value(), password: password?.value()}))
-        });
+            let to_input = |elem: Element| {elem.dyn_into().ok()};
+            let username: HtmlInputElement = inputs.named_item("username").map(to_input).flatten()
+                .ok_or_else(|| "Form doesn't have a \"username\" input")?;
+            let password: HtmlInputElement = inputs.named_item("password").map(to_input).flatten()
+                .ok_or_else(|| "Form doesn't have a \"password\" input")?;
+            Ok(Some(LoginMsg::Try(User {username: username.value(), password: password.value()})))
+        }));
         return html!{
             <form {onsubmit}>
                 <p><label>{"Username: "}<input type="text" name="username"/></label></p>
